@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "Minimal Lightdash definition (staging)"
+    meta:
+      lightdash:
+        dimensions:
+          order_id:
+            type: number
+            sql: ${order_id}
+          customer_id:
+            type: number
+            sql: ${customer_id}
+          ordered_at:
+            type: timestamp
+            sql: ${ordered_at}

@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: fct_orders
-    description: "Minimal Lightdash definition"
+    description: "Minimal Lightdash definition (core)"
     meta:
       lightdash:
         dimensions:
@@ -12,7 +12,6 @@ models:
           ordered_at:
             type: timestamp
             sql: ${ordered_at}
-
         measures:
           gmv_running_total:
             type: running_total

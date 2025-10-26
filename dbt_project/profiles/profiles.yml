@@ -5,7 +5,7 @@ jaffle_bq:
       type: bigquery
       method: oauth
       project: "{{ env_var('ANALYTICS_PROJECT_ID') }}"
-      dataset: "{{ env_var('ANALYTICS_DATASET_ID', 'jaffle') }}"
+      dataset: "{{ env_var('ANALYTICS_DATASET_ID', 'jaffle_analytics') }}"
       location: "{{ env_var('ANALYTICS_LOCATION', 'US') }}"
       threads: 4
       priority: interactive
