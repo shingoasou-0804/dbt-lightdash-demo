@@ -1,64 +1,95 @@
 version: 2
+
 models:
   - name: fct_orders
     description: "Order-level facts for KPI"
-    columns:
-      - name: order_total
-        meta:
-          metrics:
-            total_revenue:
-              type: sum
-              format: '$#,##0'
-      - name: subtotal
-        meta:
-          metrics:
-            net_sales:
-              type: sum
-              format: '$#,##0'
-      - name: tax_paid
-        meta:
-          metrics:
-            tax_collected:
-              type: sum
-              format: '$#,##0'
-      - name: order_id
-        meta:
-          metrics:
-            orders:
-              type: count_distinct
-      - name: customer_id
-        meta:
-          metrics:
-            unique_customers:
-              type: count_distinct
-      - name: items_count
-        meta:
-          metrics:
-            items_sold:
-              type: sum
+    meta:
+      lightdash:
+        dimensions:
+          order_id:
+            type: number
+            sql: ${order_id}
+          customer_id:
+            type: number
+            sql: ${customer_id}
+          ordered_at:
+            type: timestamp
+            sql: ${ordered_at}
+          ordered_date:
+            type: date
+            sql: CAST(${ordered_at} AS DATE)
+          total_revenue:
+            type: number
+            sql: ${order_total}
+          net_sales:
+            type: number
+            sql: ${subtotal}
+          tax_paid_dim:
+            type: number
+            sql: ${tax_paid}
+          item_count_dim:
+            type: number
+            sql: ${item_count}
+          cogs_dim:
+            type: number
+            sql: ${cogs_amount}
+        measures:
+          orders:
+            type: count_distinct
+            sql: ${order_id}
+            description: "Number of orders"
+          unique_customers:
+            type: count_distinct
+            sql: ${customer_id}
+            description: "Unique customers"
+          total_revenue_sum:
+            type: sum
+            sql: ${total_revenue}
+            format: '$#,##0'
+            description: "Gross revenue (sum of order_total)"
+          net_sales_sum:
+            type: sum
+            sql: ${subtotal}
+            format: '$#,##0'
+            description: "Net sales (sum of subtotal)"
+          tax_collected:
+            type: sum
+            sql: ${tax_paid_dim}
+            format: '$#,##0'
+            description: "Tax collected"
+          items_sold:
+            type: sum
+            sql: ${item_count_dim}
+            description: "Items sold"
+          cogs_sum:
+            type: sum
+            sql: ${cogs_dim}
+            format: '$#,##0'
+            description: "Cost of goods sold"
+          aov:
+            type: number
+            sql: ${net_sales_sum} / NULLIF(${orders}, 0)
+            format: '$#,##0.00'
+            description: "Average order value"
+          items_per_order:
+            type: number
+            sql: ${items_sold} / NULLIF(${orders}, 0)
+            format: '#,##0.00'
+            description: "Items per order"
+          gmv_running_total:
+            type: running_total
+            sql: ${total_revenue}    # running_total は dimension を参照
+            description: "Running total of gross revenue"
+          gross_profit:
+            type: number
+            sql: ${net_sales_sum} - ${cogs_sum}
+            format: '$#,##0'
+            description: "Gross profit (net sales - COGS)"
+          gross_margin_pct:
+            type: number
+            sql: ${gross_profit} / NULLIF(${net_sales_sum}, 0)
+            format: '0.0%'
+            description: "Gross profit / Net sales"
+
     meta:
       group_label: "KPI"
-      metrics:
-        aov:
-          type: number
-          sql: ${net_sales} / NULLIF(${orders},0)
-          format: '$#,##0.00'
-          description: 'Average order value'
-        items_per_order:
-          type: number
-          sql: ${items_sold} / NULLIF(${orders},0)
-          format: '#,##0.00'
-        gmv_running_total:
-          type: running_total
-          sql: ${total_revenue}
-          description: 'Running total revenue'
-        gross_profit:
-          type: number
-          sql: ${net_sales} - SUM(${ref('fct_orders')}.cogs_amount)
-          format: '$#,##0'
-          desctiption: 'Net sales minus cost of goods sold'
-        gross_margin_pct:
-          type: number
-          sql: ( ${gross_profit} / NULLIF(${net_sales},0) )
-          format: '0.0%'
-          description: 'Gross profit / Net sales'

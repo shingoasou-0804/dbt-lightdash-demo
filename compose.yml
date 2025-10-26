@@ -57,6 +57,14 @@ services:
       PGPASSWORD: lightdash
       PGDATABASE: lightdash
       LIGHTDASH_URL: ${LIGHTDASH_URL:-http://localhost:8080}
+
+      RAW_PROJECT_ID: ${RAW_PROJECT_ID}
+      RAW_DATASET_ID: ${RAW_DATASET_ID}
+      RAW_LOCATION:   ${RAW_LOCATION}
+
+      ANALYTICS_PROJECT_ID: ${ANALYTICS_PROJECT_ID}
+      ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
+      ANALYTICS_LOCATION:   ${ANALYTICS_LOCATION}
     volumes:
       - ./dbt_project:/usr/app/dbt:rw
       - ./lightdash/lightdash.yaml:/usr/app/lightdash/lightdash.yaml:ro
