@@ -37,3 +37,10 @@ resource "google_bigquery_dataset_iam_member" "ld_viewer" {
   role       = "roles/bigquery.dataViewer"
   member     = "serviceAccount:${google_service_account.lightdash_viewer.email}"
 }
+
+resource "google_bigquery_dataset_iam_member" "ld_metaviewer" {
+  project    = var.analytics_project_id
+  dataset_id = var.analytics_dataset_id
+  role       = "roles/bigquery.metadataViewer"
+  member     = "serviceAccount:${google_service_account.lightdash_viewer.email}"
+}
