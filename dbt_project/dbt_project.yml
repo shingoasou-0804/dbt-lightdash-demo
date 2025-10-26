@@ -7,9 +7,10 @@ model-paths:
 test-paths:
   - models/tests
 models:
-  +materialized: table
-  staging:
-    +materialized: view
-  marts:
-    +materialized: table
+  jaffle_bq:
+    staging:
+      +materialized: view
+    marts:
+      core:
+        +materialized: table
 target-path: target
