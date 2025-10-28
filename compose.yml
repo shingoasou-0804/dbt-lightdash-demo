@@ -66,6 +66,9 @@ services:
       ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
       ANALYTICS_LOCATION:   ${ANALYTICS_LOCATION}
 
+      # dbt設定
+      DBT_PROFILES_DIR: /usr/app/dbt/profiles
+
       # AI機能の有効化（APIキーが必要）
       # AI_COPILOT_ENABLED: true
       # ASK_AI_BUTTON_ENABLED: true
