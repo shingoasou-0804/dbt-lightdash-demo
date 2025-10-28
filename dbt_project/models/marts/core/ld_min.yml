@@ -2,17 +2,151 @@ version: 2
 
 models:
   - name: fct_orders
-    description: "Minimal Lightdash definition (core)"
+    description: "注文ファクトテーブル - 注文レベルの集計データ"
     meta:
       lightdash:
         dimensions:
-          total_revenue:
-            type: number
-            sql: ${order_total}
+          order_id:
+            type: string
+            description: "注文ID"
+          customer_id:
+            type: string
+            description: "顧客ID"
           ordered_at:
             type: timestamp
-            sql: ${ordered_at}
+            description: "注文日時"
+          store_id:
+            type: string
+            description: "店舗ID"
+          item_count:
+            type: number
+            description: "注文アイテム数"
+          items_amount:
+            type: number
+            description: "アイテム金額合計"
+          cogs_amount:
+            type: number
+            description: "売上原価"
+          subtotal:
+            type: number
+            description: "小計"
+          tax_paid:
+            type: number
+            description: "税金"
+          order_total:
+            type: number
+            description: "注文合計金額"
         measures:
-          gmv_running_total:
-            type: running_total
+          total_orders:
+            type: count
+            description: "総注文数"
+          total_revenue:
+            type: sum
+            sql: ${order_total}
+            description: "総売上"
+          avg_order_value:
+            type: average
+            sql: ${order_total}
+            description: "平均注文価値"
+          total_items:
+            type: sum
+            sql: ${item_count}
+            description: "総アイテム数"
+
+  - name: fct_order_items
+    description: "注文アイテムファクトテーブル - アイテムレベルの詳細データ"
+    meta:
+      lightdash:
+        dimensions:
+          item_id:
+            type: string
+            description: "アイテムID"
+          order_id:
+            type: string
+            description: "注文ID"
+          customer_id:
+            type: string
+            description: "顧客ID"
+          ordered_at:
+            type: timestamp
+            description: "注文日時"
+          store_id:
+            type: string
+            description: "店舗ID"
+          sku:
+            type: string
+            description: "SKU"
+          product_name:
+            type: string
+            description: "商品名"
+          product_type:
+            type: string
+            description: "商品タイプ"
+          price:
+            type: number
+            description: "単価"
+          quantity:
+            type: number
+            description: "数量"
+          amount:
+            type: number
+            description: "金額"
+          cogs_unit_cost:
+            type: number
+            description: "単位売上原価"
+          cogs_amount:
+            type: number
+            description: "売上原価"
+        measures:
+          total_items_sold:
+            type: count
+            description: "総販売アイテム数"
+          total_revenue:
+            type: sum
+            sql: ${amount}
+            description: "総売上"
+          total_cogs:
+            type: sum
+            sql: ${cogs_amount}
+            description: "総売上原価"
+          avg_item_price:
+            type: average
+            sql: ${price}
+            description: "平均アイテム価格"
+
+  - name: dim_customers
+    description: "顧客ディメンションテーブル - 顧客の集計情報"
+    meta:
+      lightdash:
+        dimensions:
+          customer_id:
+            type: string
+            description: "顧客ID"
+          customer_name:
+            type: string
+            description: "顧客名"
+          first_order_at:
+            type: timestamp
+            description: "初回注文日"
+          last_order_at:
+            type: timestamp
+            description: "最終注文日"
+          orders_count:
+            type: number
+            description: "注文回数"
+          total_revenue:
+            type: number
+            description: "総売上"
+        measures:
+          total_customers:
+            type: count_distinct
+            sql: ${customer_id}
+            description: "総顧客数"
+          avg_orders_per_customer:
+            type: average
+            sql: ${orders_count}
+            description: "顧客あたり平均注文数"
+          avg_revenue_per_customer:
+            type: average
             sql: ${total_revenue}
+            description: "顧客あたり平均売上"

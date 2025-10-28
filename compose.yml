@@ -18,6 +18,9 @@ services:
       ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
       ANALYTICS_LOCATION: ${ANALYTICS_LOCATION:-US}
 
+      # Google Cloud Project ID (dbt警告解決用)
+      GOOGLE_CLOUD_PROJECT: ${ANALYTICS_PROJECT_ID}
+
       DBT_PROFILES_DIR: /app/dbt_project/profiles
     # 起動時に seed → run → test
     command: >
