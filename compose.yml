@@ -65,6 +65,11 @@ services:
       ANALYTICS_PROJECT_ID: ${ANALYTICS_PROJECT_ID}
       ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
       ANALYTICS_LOCATION:   ${ANALYTICS_LOCATION}
+
+      # AI機能の有効化（APIキーが必要）
+      # AI_COPILOT_ENABLED: true
+      # ASK_AI_BUTTON_ENABLED: true
+      # AI_DEFAULT_PROVIDER: openai
     volumes:
       - ./dbt_project:/usr/app/dbt:rw
       - ./lightdash/lightdash.yaml:/usr/app/lightdash/lightdash.yaml:ro
