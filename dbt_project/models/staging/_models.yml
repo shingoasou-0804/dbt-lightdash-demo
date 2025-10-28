@@ -1,17 +1,14 @@
 version: 2
 
 models:
-  - name: stg_orders
+  - name: stg_customers
     description: "Minimal Lightdash definition (staging)"
     meta:
       lightdash:
         dimensions:
-          order_id:
-            type: number
-            sql: ${order_id}
           customer_id:
             type: number
             sql: ${customer_id}
-          ordered_at:
-            type: timestamp
-            sql: ${ordered_at}
+          customer_name:
+            type: string
+            sql: ${customer_name}
