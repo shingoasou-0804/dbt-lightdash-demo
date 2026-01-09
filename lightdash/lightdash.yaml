@@ -1,0 +1,6 @@
+version: 2
+project:
+  name: jaffle_bq
+  dbt:
+    project_dir: /usr/app/dbt
+    profiles_dir: /usr/app/dbt/profiles

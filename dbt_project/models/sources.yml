@@ -1,0 +1,17 @@
+version: 2
+sources:
+  - name: jaffle_raw
+    database: "{{ env_var('RAW_PROJECT_ID') }}"
+    schema: "{{ env_var('RAW_DATASET_ID', 'jaffle_raw') }}"
+    loader: "manual load"
+    tables:
+      - name: jaffle_data_customers
+      - name: jaffle_data_items
+      - name: jaffle_data_orders
+      - name: jaffle_data_products
+      - name: jaffle_data_stores
+      - name: jaffle_data_supplies
+    
+    freshness:
+      warn_after: {count: 7, period: day}
+      error_after: {count: 14, period: day}

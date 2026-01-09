@@ -1,0 +1,84 @@
+services:
+  dbt:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dbt
+    env_file:
+      - ./.env
+    volumes:
+      - ./dbt_project:/app/dbt_project:rw
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+    working_dir: /app/dbt_project
+    environment:
+      RAW_PROJECT_ID: ${RAW_PROJECT_ID}
+      RAW_DATASET_ID: ${RAW_DATASET_ID}
+      RAW_LOCATION: ${RAW_LOCATION:-US}
+
+      ANALYTICS_PROJECT_ID: ${ANALYTICS_PROJECT_ID}
+      ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
+      ANALYTICS_LOCATION: ${ANALYTICS_LOCATION:-US}
+
+      # Google Cloud Project ID (dbt警告解決用)
+      GOOGLE_CLOUD_PROJECT: ${ANALYTICS_PROJECT_ID}
+
+      DBT_PROFILES_DIR: /app/dbt_project/profiles
+    # 起動時に seed → run → test
+    command: >
+      bash -lc "
+        uv run dbt deps &&
+        uv run dbt seed --full-refresh &&
+        uv run dbt run &&
+        uv run dbt test
+      "
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: lightdash
+      POSTGRES_PASSWORD: lightdash
+      POSTGRES_DB: lightdash
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lightdash -d lightdash"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  lightdash:
+    image: lightdash/lightdash:0.2027.0
+    platform: linux/amd64
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      LIGHTDASH_SECRET: ${LIGHTDASH_SECRET}
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: lightdash
+      PGPASSWORD: lightdash
+      PGDATABASE: lightdash
+      LIGHTDASH_URL: ${LIGHTDASH_URL:-http://localhost:8080}
+
+      RAW_PROJECT_ID: ${RAW_PROJECT_ID}
+      RAW_DATASET_ID: ${RAW_DATASET_ID}
+      RAW_LOCATION:   ${RAW_LOCATION}
+
+      ANALYTICS_PROJECT_ID: ${ANALYTICS_PROJECT_ID}
+      ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
+      ANALYTICS_LOCATION:   ${ANALYTICS_LOCATION}
+
+      # dbt設定
+      DBT_PROFILES_DIR: /usr/app/dbt/profiles
+
+      # AI機能の有効化（APIキーが必要）
+      # AI_COPILOT_ENABLED: true
+      # ASK_AI_BUTTON_ENABLED: true
+      # AI_DEFAULT_PROVIDER: openai
+    volumes:
+      - ./dbt_project:/usr/app/dbt:rw
+      - ./lightdash/lightdash.yaml:/usr/app/lightdash/lightdash.yaml:ro
+
+volumes:
+  pgdata:

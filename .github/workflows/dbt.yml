@@ -1,0 +1,59 @@
+name: dbt pipeline (ANALYTICS run/test)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    # RunnerはUTC。JST 07:00 = UTC 22:00
+    - cron: "0 22 * * *"
+
+concurrency:
+  group: dbt-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  RAW_PROJECT_ID: ${{ secrets.RAW_PROJECT_ID }}
+  RAW_DATASET_ID: ${{ secrets.RAW_DATASET_ID }}
+  RAW_LOCATION: ${{ secrets.RAW_LOCATION }}
+  ANALYTICS_PROJECT_ID: ${{ secrets.ANALYTICS_PROJECT_ID }}
+  ANALYTICS_DATASET_ID: ${{ secrets.ANALYTICS_DATASET_ID }}
+  ANALYTICS_LOCATION: ${{ secrets.ANALYTICS_LOCATION }}
+
+jobs:
+  run_and_test:
+    name: Run & Test on ANALYTICS
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with: { submodules: false }
+      
+      - name: Auth to Google (WIF, keyless)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GC_WIF_PROVIDER }}
+          service_account: ${{ secrets.GC_SA_EMAIL }}
+          create_credentials_file: true
+      
+      - name: Build dbt image (uv + dbt-bigquery on Python 3.12)
+        run: docker build -f docker/Dockerfile.dbt -t dbt-img .
+      
+      - name: dbt run / test (to ANALYTICS, read RAW)
+        run: |
+          docker run --rm \
+            -e RAW_PROJECT_ID -e RAW_DATASET_ID -e RAW_LOCATION \
+            -e ANALYTICS_PROJECT_ID -e ANALYTICS_DATASET_ID -e ANALYTICS_LOCATION \
+            -e GOOGLE_APPLICAION_CREDENTIALS=/tmp/gcloud.json \
+            -v "${{ github.workspace }}/dbt_project:/app/dbt_projectject" \
+            -v "${{ steps.auth.outputs.credentials_file_path }}:/tmp/gcloud.json:ro" \
+            dbt-img bash -lc '
+              set -e
+              uv run dbt deps &&
+              uv run dbt run --target prod &&
+              uv run dbt test --target prod &&
+              uv run dbt docs generate --target prod
+            '

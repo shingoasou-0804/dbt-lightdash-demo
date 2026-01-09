@@ -1,0 +1,16 @@
+name: jaffle_bq
+version: '1.0'
+config-version: 2
+profile: jaffle_bq
+model-paths:
+  - models
+test-paths:
+  - tests
+models:
+  jaffle_bq:
+    staging:
+      +materialized: view
+    marts:
+      core:
+        +materialized: table
+target-path: target

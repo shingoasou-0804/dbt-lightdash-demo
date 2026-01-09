@@ -1,0 +1,12 @@
+jaffle_bq:
+  target: prod
+  outputs:
+    prod:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('ANALYTICS_PROJECT_ID') }}"
+      dataset: "{{ env_var('ANALYTICS_DATASET_ID', 'jaffle_analytics') }}"
+      location: "{{ env_var('ANALYTICS_LOCATION', 'US') }}"
+      threads: 4
+      priority: interactive
+      timeout_seconds: 300
